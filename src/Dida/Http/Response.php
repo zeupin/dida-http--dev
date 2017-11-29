@@ -89,4 +89,51 @@ class Response
         header('Content-Type:application/json; charset=utf-8');
         echo "$callback(" . json_encode($data) . ");";
     }
+
+
+    /**
+     * 输出一个文件下载。
+     *
+     * @param string $srcfile
+     * @param string $name
+     * @param boolean $mime
+     *
+     * @return boolean
+     */
+    public static function download($srcfile, $name = null, $mime = false)
+    {
+        // 如果下载源文件不存在，直接返回false。
+        if (!file_exists($srcfile)) {
+            return false;
+        }
+
+        // 下载的文件名
+        if ($name) {
+            $name = basename($name);
+        } else {
+            $name = basename($srcfile);
+        }
+
+        // 如果需要自动设置mime，调用php的mime_content_type()函数来处理。
+        if ($mime) {
+            $mimetype = mime_content_type($srcfile);
+        } else {
+            $mimetype = 'application/force-download';
+        }
+
+        // 文件大小
+        $filesize = filesize($srcfile);
+
+        // 输出
+        header("Content-Type: $mimetype");
+        header('Content-Disposition: attachment; filename="' . $name . '"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header("Content-Length: $filesize");
+        ob_clean();
+        flush();
+        readfile($srcfile);
+        exit();
+    }
 }
