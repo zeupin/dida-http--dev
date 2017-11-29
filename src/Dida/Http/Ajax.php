@@ -10,14 +10,14 @@
 namespace Dida\Http;
 
 /**
- * Response
+ * Ajax 主要用于和客户端的Ajax进行交互。
  */
-class Response
+class Ajax
 {
     /**
      * Version
      */
-    const VERSION = '20171129';
+    const VERSION = '20171128';
 
 
     /**
@@ -29,5 +29,18 @@ class Response
     {
         header('Content-Type:application/json; charset=utf-8');
         echo json_encode($data);
+    }
+
+
+    /**
+     * 输出一个jsonp格式的ajax应答。
+     *
+     * @param type $data
+     * @param type $callback
+     */
+    public static function jsonp($data, $callback)
+    {
+        header('Content-Type:application/json; charset=utf-8');
+        echo $callback . "(" . json_encode($data) . ");";
     }
 }
