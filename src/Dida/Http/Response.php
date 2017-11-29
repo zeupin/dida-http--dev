@@ -94,46 +94,60 @@ class Response
     /**
      * 输出一个文件下载。
      *
-     * @param string $srcfile
-     * @param string $name
-     * @param boolean $mime
+     * @param string $srcfile   服务器上源文件的文件名。
+     * @param string $name      下载时的文件名。如果为null，则默认使用srcfile的文件名。
+     * @param boolean $mime     是否需要设置文件的mime。
      *
      * @return boolean
      */
     public static function download($srcfile, $name = null, $mime = false)
     {
-        // 如果下载源文件不存在，直接返回false。
-        if (!file_exists($srcfile)) {
-            return false;
+        // 检查待下载的源文件是否存在。
+        if (file_exists($srcfile)) {
+            $realfile = $srcfile;
+        } else {
+            // 测试是否是因为中文字符编码导致的问题
+            $realfile = iconv('UTF-8', 'GBK', $srcfile);
+            if (!file_exists($realfile)) {
+                return false;
+            }
         }
 
-        // 下载的文件名
-        if ($name) {
-            $name = basename($name);
-        } else {
-            $name = basename($srcfile);
+        // 下载的文件名。
+        // 本来是用PHP自带basename()函数，但是basename()处理中文文件名时要先setlocale(LC_ALL, 'PRC')，
+        // 不然会处理错误。而setlocale()函数不一定所有服务器都能支持，所以换成用如下代码填坑。
+        if (!is_string($name)) {
+            $name = $srcfile;
         }
+        $name = str_replace('\\', '/', $name);
+        $basename = mb_strrchr($name, '/');
+        if ($basename) {
+            $name = mb_substr($basename, 1);
+        }
+
+        // 对下载文件名按照RFC3896进行rawurlencode编码，以支持中文文件名。
+        $name = rawurlencode($name);
 
         // 如果需要自动设置mime，调用php的mime_content_type()函数来处理。
         if ($mime) {
-            $mimetype = mime_content_type($srcfile);
+            $mimetype = mime_content_type($realfile);
         } else {
             $mimetype = 'application/force-download';
         }
 
         // 文件大小
-        $filesize = filesize($srcfile);
+        $filesize = filesize($realfile);
 
         // 输出
         header("Content-Type: $mimetype");
-        header('Content-Disposition: attachment; filename="' . $name . '"');
+        header("Content-Disposition: attachment; filename*=\"$name\"");
         header('Expires: 0');
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
         header("Content-Length: $filesize");
         ob_clean();
         flush();
-        readfile($srcfile);
+        readfile($realfile);
         exit();
     }
 }
