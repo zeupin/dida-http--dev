@@ -31,7 +31,7 @@ class Request
 
 
     /**
-     * 解析url
+     * 解析url。
      */
     protected static function parseUrl()
     {
@@ -136,7 +136,7 @@ class Request
 
 
     /**
-     * 是否是Ajax请求
+     * 是否是Ajax请求。
      *
      * @return boolean
      */
@@ -148,7 +148,7 @@ class Request
 
 
     /**
-     * 获取客户端IP
+     * 获取客户端IP。
      *
      * @return string|false 正常返回读取到的ip，无法获取时，返回false
      */
@@ -170,7 +170,7 @@ class Request
 
 
     /**
-     * 获取Request的协议名(http/https)
+     * 获取Request的协议名(http/https)。
      *
      * @return string|false 正常返回读取到的schema，无法获取时，返回false
      */
@@ -184,7 +184,118 @@ class Request
     }
 
 
+    /**
+     * 表单参数，相当于$_POST。
+     */
     public static function post()
+    {
+
+    }
+
+
+    /**
+     * 查询参数，相当于$_GET。
+     */
+    public static function get()
+    {
+
+    }
+
+
+    /**
+     * 服务器环境参数，相当于$_SERVER。
+     */
+    public static function server()
+    {
+
+    }
+
+
+    /**
+     * 上传文件参数，相当于$_FILES。
+     */
+    public static function files()
+    {
+
+    }
+
+
+    /**
+     * Cookie参数，相当于$_COOKIE。
+     */
+    public static function cookie()
+    {
+
+    }
+
+
+    /**
+     * Session参数，相当于$_SESSION。
+     */
+    public static function session()
+    {
+
+    }
+
+
+    /**
+     * 请求的报文头。
+     */
+    public static function headers()
+    {
+
+    }
+
+
+    /**
+     * 所有请求变量。
+     */
+    public static function all()
+    {
+
+    }
+
+
+    /**
+     * 只需要这些请求变量。
+     */
+    public static function only()
+    {
+
+    }
+
+
+    /**
+     * 所有的请求变量，除了以下这些。
+     */
+    public static function except()
+    {
+
+    }
+
+
+    /**
+     * 临时保存所有数据，以备后面使用。
+     */
+    public static function flashAll()
+    {
+
+    }
+
+
+    /**
+     * 临时保存如下数据，以备后面使用。
+     */
+    public static function flashOnly()
+    {
+
+    }
+
+
+    /**
+     * 临时保存所有数据，除了以下这些，以备后面使用。
+     */
+    public static function flashExcept()
     {
 
     }
