@@ -182,4 +182,10 @@ class Request
             return false;
         }
     }
+
+
+    public static function post()
+    {
+
+    }
 }
