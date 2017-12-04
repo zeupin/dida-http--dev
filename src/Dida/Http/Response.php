@@ -59,9 +59,11 @@ class Response
     public static function redirect($url, $refresh = null)
     {
         if (is_numeric($refresh)) {
+            header("Cache-control: no-cache");
             header("Refresh: $refresh; url=$url");
         } else {
-            header("Location: $url", true, 301);
+            header("Cache-control: no-cache");
+            header("Location: $url", true, 307);
             exit();
         }
     }
