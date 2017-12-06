@@ -34,19 +34,23 @@ class Request
      */
     protected static $urlinfo = null;
 
-    /**
-     * 内部变量
+    /*
+     * 内部数组。
      */
-    protected static $method = null;
-    protected static $isAjax = null;
-    protected static $clientIP = null;
-    protected static $schema = null;
     protected static $post = [];
     protected static $get = [];
     protected static $cookie = [];
     protected static $session = [];
     protected static $server = [];
     protected static $headers = [];
+
+    /*
+     * 内部变量。
+     */
+    protected static $method = null;
+    protected static $isAjax = null;
+    protected static $clientIP = null;
+    protected static $schema = null;
 
 
     /**
