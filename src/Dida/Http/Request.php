@@ -29,19 +29,34 @@ class Request
      */
     protected static $urlinfo = null;
 
+    /**
+     * 内部变量
+     */
+    protected static $method = null;
+    protected static $isAjax = null;
+    protected static $clientIP = null;
+    protected static $schema = null;
+    protected static $post = [];
+    protected static $get = [];
+    protected static $server = [];
+    protected static $cookie = [];
+    protected static $session = [];
+    protected static $headers = [];
+
 
     /**
-     * 解析url。
+     * 初始化Request，为后面的取值提供数据。
      */
-    protected static function parseUrl()
+    public static function init()
     {
-        // 不重复初始化
-        if (self::$urlinfo) {
-            return;
-        }
-
         // path，query，fragment
         self::$urlinfo = parse_url($_SERVER["REQUEST_URI"]);
+
+        // init
+        self::initMethod();
+        self::initIsAjax();
+        self::initClientIP();
+        self::initSchema();
     }
 
 
@@ -52,12 +67,9 @@ class Request
      */
     public static function path()
     {
+        // 如果init()时，parse_url()时失败
         if (self::$urlinfo === false) {
             return false;
-        }
-
-        if (self::$urlinfo === null) {
-            self::parseUrl();
         }
 
         return isset(self::$urlinfo['path']) ? self::$urlinfo['path'] : null;
@@ -71,12 +83,9 @@ class Request
      */
     public static function queryString()
     {
+        // 如果init()时，parse_url()时失败
         if (self::$urlinfo === false) {
             return false;
-        }
-
-        if (self::$urlinfo === null) {
-            self::parseUrl();
         }
 
         return isset(self::$urlinfo['query']) ? self::$urlinfo['query'] : null;
@@ -90,12 +99,9 @@ class Request
      */
     public static function fragment()
     {
+        // 如果init()时，parse_url()时失败
         if (self::$urlinfo === false) {
             return false;
-        }
-
-        if (self::$urlinfo === null) {
-            self::parseUrl();
         }
 
         return isset(self::$urlinfo['fragment']) ? self::$urlinfo['fragment'] : null;
@@ -103,15 +109,9 @@ class Request
 
 
     /**
-     * 获取Request的method。
-     *
-     * 如果有POST的DIDA_REQUEST_METHOD字段，则以此字段为准。
-     * 没有这个字段，则看是普通的get还是post。
-     * 正常返回get，post，put，patch，delete，head，options之一；如果非法，返回false。
-     *
-     * @return string|false
+     * 初始化method。
      */
-    public static function method()
+    protected static function initMethod()
     {
         if (isset($_POST['DIDA_REQUEST_METHOD'])) {
             $method = strtolower($_POST['DIDA_REQUEST_METHOD']);
@@ -128,10 +128,41 @@ class Request
             case 'delete':   // 删除资源
             case 'head':     // 查询资源头
             case 'options':  // 查询可选操作
-                return $method;
+                self::$method = $method;
+                return;
             default:
-                return false;
+                self::$method = false;
+                return;
         }
+    }
+
+
+    /**
+     * 获取Request的method。
+     *
+     * 如果有POST的DIDA_REQUEST_METHOD字段，则以此字段为准。
+     * 没有这个字段，则看是普通的get还是post。
+     * 正常返回get，post，put，patch，delete，head，options之一；如果非法，返回false。
+     *
+     * @return string|false
+     */
+    public static function method()
+    {
+        return self::$method;
+    }
+
+
+    /**
+     * 初始化isAjax。
+     */
+    protected static function initIsAjax()
+    {
+        if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+            self::$isAjax = false;
+            return;
+        }
+
+        self::$isAjax = (strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
     }
 
 
@@ -142,17 +173,14 @@ class Request
      */
     public static function isAjax()
     {
-        return (isset($_SERVER['HTTP_X_REQUESTED_WITH'])) &&
-            (strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+        return self::$isAjax;
     }
 
 
     /**
-     * 获取客户端IP。
-     *
-     * @return string|false 正常返回读取到的ip，无法获取时，返回false
+     * 初始化clientIP。
      */
-    public static function clientIP()
+    protected static function initClientIP()
     {
         if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
             $ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
@@ -164,8 +192,31 @@ class Request
             $ip = false; // ip未定义
         }
 
-        // 返回结果
-        return $ip;
+        self::$clientIP = $ip;
+    }
+
+
+    /**
+     * 获取客户端IP。
+     *
+     * @return string|false 正常返回读取到的ip，无法获取时，返回false
+     */
+    public static function clientIP()
+    {
+        return self::$clientIP;
+    }
+
+
+    /**
+     * 初始化schema。
+     */
+    protected static function initSchema()
+    {
+        if (isset($_SERVER['REQUEST_SCHEME'])) {
+            self::$schema = $_SERVER['REQUEST_SCHEME'];
+        } else {
+            self::$schema = false;
+        }
     }
 
 
@@ -176,11 +227,7 @@ class Request
      */
     public static function schema()
     {
-        if (isset($_SERVER['REQUEST_SCHEME'])) {
-            return $_SERVER['REQUEST_SCHEME'];
-        } else {
-            return false;
-        }
+        return self::$schema;
     }
 
 
@@ -296,5 +343,24 @@ class Request
      */
     public static function flashExcept()
     {
+    }
+
+
+    /**
+     * 一个工具函数。
+     * 如果数组中key存在，则返回对应的value，否则返回null。
+     *
+     * @param int|string $key
+     * @param array $array
+     *
+     * @return mixed
+     */
+    protected function arrayValue($key, array $array)
+    {
+        if (array_key_exists($key, $array)) {
+            return $array[$key];
+        } else {
+            return null;
+        }
     }
 }
