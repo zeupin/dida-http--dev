@@ -279,19 +279,6 @@ class Request
 
 
     /**
-     * 服务器环境参数，相当于$_SERVER。
-     */
-    public static function server($index = null)
-    {
-        if (is_null($index)) {
-            return self::$server;
-        }
-
-        return self::arrayValue($index, self::$server);
-    }
-
-
-    /**
      * 上传文件参数，相当于$_FILES。
      */
     public static function files($index = null)
@@ -326,6 +313,19 @@ class Request
 
 
     /**
+     * 服务器环境参数，相当于$_SERVER。
+     */
+    public static function server($index = null)
+    {
+        if (is_null($index)) {
+            return self::$server;
+        }
+
+        return self::arrayValue($index, self::$server);
+    }
+
+
+    /**
      * 请求的报文头。
      */
     public static function headers($index = null)
@@ -346,12 +346,18 @@ class Request
      */
     public static function input($index = null)
     {
+        if (is_null($index)) {
+            return array_merge(self::$cookie, self::$get, self::$post);
+        }
+
         if (array_key_exists($indx, self::$post)) {
             return self::$post[$index];
         } elseif (array_key_exists($indx, self::$get)) {
             return self::$get[$index];
         } elseif (array_key_exists($indx, self::$cookie)) {
             return self::$cookie[$index];
+        } else {
+            return null;
         }
     }
 
