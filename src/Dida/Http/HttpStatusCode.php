@@ -17,7 +17,7 @@ class HttpStatusCode
     /**
      * Version
      */
-    const VERSION = '20171129';
+    const VERSION = '20171206';
 
 
     /**
@@ -58,5 +58,15 @@ class HttpStatusCode
         } else {
             return false;
         }
+    }
+
+
+    /**
+     * 发送一个特定的应答码
+     * @param int $response_code
+     */
+    public static function send($response_code)
+    {
+        http_response_code($response_code);
     }
 }
