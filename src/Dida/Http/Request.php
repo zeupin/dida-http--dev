@@ -17,7 +17,7 @@ class Request
     /**
      * Version
      */
-    const VERSION = '20171130';
+    const VERSION = '20171206';
 
     /**
      * @var array
@@ -38,9 +38,9 @@ class Request
     protected static $schema = null;
     protected static $post = [];
     protected static $get = [];
-    protected static $server = [];
     protected static $cookie = [];
     protected static $session = [];
+    protected static $server = [];
     protected static $headers = [];
 
 
@@ -57,6 +57,21 @@ class Request
         self::initIsAjax();
         self::initClientIP();
         self::initSchema();
+
+        // POST,GET,COOKIE,SERVER,SESSION
+        self::$post = $_POST;
+        self::$get = $_GET;
+        self::$cookie = $_COOKIE;
+        self::$session = $_SESSION;
+        self::$server = $_SERVER;
+
+        // headers
+        if (function_exists("apache_request_headers")) {
+            $headers = apache_request_headers();
+            if (is_array($headers)) {
+                self::$headers = $headers;
+            }
+        }
     }
 
 
@@ -237,32 +252,49 @@ class Request
 
     /**
      * 表单参数，相当于$_POST。
+     *
+     * @return array|mixed
      */
-    public static function post()
+    public static function post($index = null)
     {
+        if (is_null($index)) {
+            return self::$post;
+        }
+
+        return self::arrayValue($index, self::$post);
     }
 
 
     /**
      * 查询参数，相当于$_GET。
      */
-    public static function get()
+    public static function get($index = null)
     {
+        if (is_null($index)) {
+            return self::$get;
+        }
+
+        return self::arrayValue($index, self::$get);
     }
 
 
     /**
      * 服务器环境参数，相当于$_SERVER。
      */
-    public static function server()
+    public static function server($index = null)
     {
+        if (is_null($index)) {
+            return self::$server;
+        }
+
+        return self::arrayValue($index, self::$server);
     }
 
 
     /**
      * 上传文件参数，相当于$_FILES。
      */
-    public static function files()
+    public static function files($index = null)
     {
     }
 
@@ -270,59 +302,203 @@ class Request
     /**
      * Cookie参数，相当于$_COOKIE。
      */
-    public static function cookie()
+    public static function cookie($index = null)
     {
+        if (is_null($index)) {
+            return self::$cookie;
+        }
+
+        return self::arrayValue($index, self::$cookie);
     }
 
 
     /**
      * Session参数，相当于$_SESSION。
      */
-    public static function session()
+    public static function session($index = null)
     {
+        if (is_null($index)) {
+            return self::$session;
+        }
+
+        return self::arrayValue($index, self::$session);
     }
 
 
     /**
      * 请求的报文头。
      */
-    public static function headers()
+    public static function headers($index = null)
     {
+        if (is_null($index)) {
+            return self::$headers;
+        }
+
+        return self::arrayValue($index, self::$headers);
     }
 
 
     /**
      * 获取用户输入数据。
      *
-     * 1.使用 POST、GET、COOKIE 和 SERVER 数据
-     * 2.使用 php://input 流
+     * 1.使用 POST、GET、COOKIE。
+     * 2.使用 php://input 流。
      */
-    public static function input()
+    public static function input($index = null)
     {
+        if (array_key_exists($indx, self::$post)) {
+            return self::$post[$index];
+        } elseif (array_key_exists($indx, self::$get)) {
+            return self::$get[$index];
+        } elseif (array_key_exists($indx, self::$cookie)) {
+            return self::$cookie[$index];
+        }
     }
 
 
     /**
-     * 所有请求变量。
+     * 从指定数组中选取这些键。
+     *
+     * @param string|array $array
+     * @param string $indexN
+     *
+     * @return array|false   正常返回一个数组，有错返回false。
      */
-    public static function all()
+    public static function only($array, $indexN)
     {
+        // $array是字符串
+        if (is_string($array)) {
+            switch ($array) {
+                case 'post':
+                    $array = self::$post;
+                    break;
+                case 'get':
+                    $array = self::$get;
+                    break;
+                case 'cookie':
+                    $array = self::$cookie;
+                    break;
+                case 'session':
+                    $array = self::$session;
+                    break;
+                case 'server':
+                    $array = self::$server;
+                    break;
+                case 'headers':
+                    $array = self::$headers;
+                    break;
+                default:
+                    return false;
+            }
+        } elseif (!is_array($array)) {
+            return false;
+        }
+
+        // 结果
+        $result = [];
+
+        // 要获取的键
+        $keys = [];
+        $cnt = func_num_args();
+        if ($cnt === 2) {
+            if (is_array($indexN)) {
+                $keys = $indexN;
+            } elseif (is_string($indexN)) {
+                $keys[] = $indexN;
+            } else {
+                return false;
+            }
+        } elseif ($cnt > 2) {
+            for ($i = 1; $i < $cnt; $i++) {
+                $index = func_get_arg($i);
+                if (is_string($index) || is_int($index)) {
+                    $keys[] = $index;
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        // 名称
+        foreach ($keys as $key) {
+            $result[$key] = self::arrayValue($key, $array);
+        }
+
+        // 返回
+        return $result;
     }
 
 
     /**
-     * 只需要这些请求变量。
+     * 从指定数组的删除以下这些键，返回其余的。
+     *
+     * @param string|array $array
+     * @param string $indexN
+     *
+     * @return array|false   正常返回一个数组，有错返回false。
      */
-    public static function only()
+    public static function except($array, $indexN)
     {
-    }
+        // $array是字符串
+        if (is_string($array)) {
+            switch ($array) {
+                case 'post':
+                    $array = self::$post;
+                    break;
+                case 'get':
+                    $array = self::$get;
+                    break;
+                case 'cookie':
+                    $array = self::$cookie;
+                    break;
+                case 'session':
+                    $array = self::$session;
+                    break;
+                case 'server':
+                    $array = self::$server;
+                    break;
+                case 'headers':
+                    $array = self::$headers;
+                    break;
+                default:
+                    return false;
+            }
+        } elseif (!is_array($array)) {
+            return false;
+        }
 
+        // 准备
+        $result = $array;
 
-    /**
-     * 所有的请求变量，除了以下这些。
-     */
-    public static function except()
-    {
+        // 要排除的键
+        $keys = [];
+        $cnt = func_num_args();
+        if ($cnt === 2) {
+            if (is_array($indexN)) {
+                $keys = $indexN;
+            } elseif (is_string($indexN)) {
+                $keys[] = $indexN;
+            } else {
+                return false;
+            }
+        } elseif ($cnt > 2) {
+            for ($i = 1; $i < $cnt; $i++) {
+                $index = func_get_arg($i);
+                if (is_string($index) || is_int($index)) {
+                    $keys[] = $index;
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        // 名称
+        foreach ($keys as $key) {
+            unset($result[$key]);
+        }
+
+        // 返回
+        return $result;
     }
 
 
@@ -359,7 +535,7 @@ class Request
      *
      * @return mixed
      */
-    protected function arrayValue($key, array $array)
+    protected static function arrayValue($key, array $array)
     {
         if (array_key_exists($key, $array)) {
             return $array[$key];
