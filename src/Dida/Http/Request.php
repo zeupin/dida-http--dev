@@ -189,7 +189,6 @@ class Request
      */
     public static function post()
     {
-
     }
 
 
@@ -198,7 +197,6 @@ class Request
      */
     public static function get()
     {
-
     }
 
 
@@ -207,7 +205,6 @@ class Request
      */
     public static function server()
     {
-
     }
 
 
@@ -216,7 +213,6 @@ class Request
      */
     public static function files()
     {
-
     }
 
 
@@ -225,7 +221,6 @@ class Request
      */
     public static function cookie()
     {
-
     }
 
 
@@ -234,7 +229,6 @@ class Request
      */
     public static function session()
     {
-
     }
 
 
@@ -243,7 +237,17 @@ class Request
      */
     public static function headers()
     {
+    }
 
+
+    /**
+     * 获取用户输入数据。
+     *
+     * 1.使用 POST、GET、COOKIE 和 SERVER 数据
+     * 2.使用 php://input 流
+     */
+    public static function input()
+    {
     }
 
 
@@ -252,7 +256,6 @@ class Request
      */
     public static function all()
     {
-
     }
 
 
@@ -261,7 +264,6 @@ class Request
      */
     public static function only()
     {
-
     }
 
 
@@ -270,7 +272,6 @@ class Request
      */
     public static function except()
     {
-
     }
 
 
@@ -279,7 +280,6 @@ class Request
      */
     public static function flashAll()
     {
-
     }
 
 
@@ -288,7 +288,6 @@ class Request
      */
     public static function flashOnly()
     {
-
     }
 
 
@@ -297,6 +296,5 @@ class Request
      */
     public static function flashExcept()
     {
-
     }
 }
