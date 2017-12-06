@@ -20,7 +20,12 @@ class Request
     const VERSION = '20171206';
 
     /**
-     * @var array
+     * @var boolean   是否执行过初始化。
+     */
+    protected static $initialized = false;
+
+    /**
+     * @var array   对Url的解析
      * [
      *    'path'     =>
      *    'query'    =>
@@ -72,6 +77,9 @@ class Request
                 self::$headers = $headers;
             }
         }
+
+        // 设置标志
+        self::$initialized = false;
     }
 
 
