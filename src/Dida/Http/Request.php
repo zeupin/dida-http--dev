@@ -61,6 +61,9 @@ class Request
         // path，query，fragment
         self::$urlinfo = parse_url($_SERVER["REQUEST_URI"]);
 
+        // 统一移除path末尾的/，以便对 “.../foo” 和 “.../foo/” 处理一致。
+        self::$urlinfo["path"] = rtrim(self::$urlinfo['path'], "/\\");
+
         // init
         self::initMethod();
         self::initIsAjax();
@@ -71,8 +74,10 @@ class Request
         self::$post = $_POST;
         self::$get = $_GET;
         self::$cookie = $_COOKIE;
-        self::$session = $_SESSION;
         self::$server = $_SERVER;
+
+        // 特别处理一下session，因为不一定session_start()被执行。
+        self::$session = (isset($_SESSION)) ? $_SESSION : [];
 
         // headers
         if (function_exists("apache_request_headers")) {
