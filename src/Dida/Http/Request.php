@@ -272,26 +272,28 @@ class Request
      *
      * @return array|mixed
      */
-    public static function post($index = null)
+    public static function post($name = null)
     {
-        if (is_null($index)) {
+        if (is_null($name)) {
             return self::$post;
         }
 
-        return self::arrayValue($index, self::$post);
+        return self::arrayValue($name, self::$post);
     }
 
 
     /**
      * 查询参数，相当于$_GET。
+     *
+     * @return array|mixed
      */
-    public static function get($index = null)
+    public static function get($name = null)
     {
-        if (is_null($index)) {
+        if (is_null($name)) {
             return self::$get;
         }
 
-        return self::arrayValue($index, self::$get);
+        return self::arrayValue($name, self::$get);
     }
 
 
