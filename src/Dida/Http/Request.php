@@ -109,6 +109,34 @@ class Request
 
 
     /**
+     * 返回路径中去除了基准路径后的剩余部分。
+     *
+     * @param string $basePath 基准路径
+     *
+     * @return false|string
+     *      URL路径不是以基准路径开头的，返回false。
+     *      返回去除基准路径后的剩余部分。
+     *      URL路径等于基准路径，返回空串。
+     */
+    public static function relativePath($basePath)
+    {
+        $path = self::path();
+
+        // URL路径等于基准路径，返回空串。
+        if ($path === $basePath) {
+            return '';
+        }
+
+        $len = mb_strlen($basePath);
+        if (mb_substr($path, 0, $len) === $basePath) {
+            return mb_substr($path, $len);
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
      * Request的查询串。
      *
      * @return string|null|false   正常返回查询串，没有则返回null，出错返回false
