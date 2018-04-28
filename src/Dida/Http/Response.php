@@ -77,7 +77,7 @@ class Response
     public static function json($data)
     {
         header('Content-Type:application/json; charset=utf-8');
-        echo json_encode($data);
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 
 
@@ -89,7 +89,7 @@ class Response
     public static function jsonp($data, $callback)
     {
         header('Content-Type:application/json; charset=utf-8');
-        echo "$callback(" . json_encode($data) . ");";
+        echo "$callback(" . json_encode($data, JSON_UNESCAPED_UNICODE) . ");";
     }
 
 
